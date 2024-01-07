@@ -1,0 +1,26 @@
+syntax = "proto3";
+option go_package = "github.com/ericlln/locator";
+
+// Locator
+message LocateRequest {
+  double l = 1;
+  double b = 2;
+  double cLat = 3;
+  double cLng = 4;
+}
+
+message Locate {
+  int32     trip_id = 1;
+  double    lat = 2;
+  double    lng = 3;
+  int32     course = 4;
+}
+
+message LocateMessage {
+  repeated Locate   locates = 1;
+  int64             timestamp = 2;
+}
+
+service Locator {
+  rpc Locate(LocateRequest) returns (LocateMessage);
+}

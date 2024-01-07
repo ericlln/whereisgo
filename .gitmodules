@@ -1,0 +1,3 @@
+[submodule "whereisgodata"]
+	path = whereisgodata
+	url = ./whereisgodata

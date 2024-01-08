@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ericlln/whereisgo/internal/config"
-	"github.com/ericlln/whereisgo/internal/db"
+	"github.com/ericlln/whereisgo/pkg/db"
 	"github.com/ericlln/whereisgo/proto"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"

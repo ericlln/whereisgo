@@ -1,4 +1,4 @@
-module github.com/ericlln/whereisgo
+module github.com/ericlln/whereisgo/server
 
 go 1.21.3
 

@@ -26,3 +26,4 @@ dist-ssr
 
 # Generated gRPC code
 /server/proto/
+/client/src/proto

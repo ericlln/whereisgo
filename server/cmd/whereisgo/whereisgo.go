@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ericlln/whereisgo/server/internal/config"
+	"github.com/ericlln/whereisgo/server/pkg/config"
 	"github.com/ericlln/whereisgo/server/pkg/db"
 	"github.com/ericlln/whereisgo/server/proto"
 	"github.com/redis/go-redis/v9"

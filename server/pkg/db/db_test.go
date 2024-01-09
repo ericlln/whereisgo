@@ -2,16 +2,15 @@ package db
 
 import (
 	"context"
-	"github.com/ericlln/whereisgodata/internal/config"
+	"github.com/ericlln/whereisgo/server/pkg/config"
 	"github.com/jackc/pgx/v5"
-
 	"testing"
 )
 
 func TestInsertRow(t *testing.T) {
 	ctx := context.Background()
 
-	pg, err := NewPG(ctx, config.GetConfig().DatabaseUrl)
+	pg, err := NewPG(ctx, config.GetConfig("server").DatabaseUrl)
 	if err != nil {
 		t.Fatalf("Expected no error for pg, got %v", err)
 	}
@@ -50,7 +49,7 @@ func TestInsertRow(t *testing.T) {
 
 func TestSingletonBehavior(t *testing.T) {
 	ctx := context.Background()
-	dbUrl := config.GetConfig().DatabaseUrl
+	dbUrl := config.GetConfig("server").DatabaseUrl
 
 	pg1, err := NewPG(ctx, dbUrl)
 	if err != nil {

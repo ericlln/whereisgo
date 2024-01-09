@@ -24,3 +24,29 @@ message LocateMessage {
 service Locator {
   rpc Locate(LocateRequest) returns (LocateMessage);
 }
+
+
+// Trip Details
+message Stops {
+  string FirstStop = 1;
+  string PrevStop = 2;
+  string LastStop = 3;
+}
+
+message TripDetailsMessage {
+  string  RouteNumber = 1;
+  string   StartTime = 2;
+  string   EndTime = 3;
+  int32   BusType = 4;
+  Stops   Stops = 5;
+  int32   DelayInSeconds = 6;
+  int64   Timestamp = 7;
+}
+
+message TripDetailsRequest {
+  int32 TripId = 1;
+}
+
+service TripDetails {
+  rpc TripDetails(TripDetailsRequest) returns (TripDetailsMessage);
+}

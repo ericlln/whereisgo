@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ericlln/whereisgo/internal/config"
-	"github.com/ericlln/whereisgo/pkg/db"
-	"github.com/ericlln/whereisgo/proto"
+	"github.com/ericlln/whereisgo/server/internal/config"
+	"github.com/ericlln/whereisgo/server/pkg/db"
+	"github.com/ericlln/whereisgo/server/proto"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"log"
@@ -16,9 +16,19 @@ import (
 	"time"
 )
 
-var red = getRedis()
+var red = initRedis()
+var pg = initPg()
 
-func getRedis() *db.Redis {
+func initPg() *db.Postgres {
+	cfg := config.GetConfig()
+	newPg, err := db.NewPG(context.Background(), cfg.DatabaseUrl)
+	if err != nil {
+		return nil
+	}
+	return newPg
+}
+
+func initRedis() *db.Redis {
 	cfg := config.GetConfig()
 	r, err := db.NewRedis(cfg.RedisUrl)
 	if err != nil {
@@ -30,6 +40,7 @@ func getRedis() *db.Redis {
 func main() {
 	server := grpc.NewServer()
 	service := &locateServer{}
+	service2 := &tripDetailsServer{}
 
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -37,6 +48,7 @@ func main() {
 	}
 
 	locator.RegisterLocatorServer(server, service)
+	locator.RegisterTripDetailsServer(server, service2)
 	err = server.Serve(listener)
 	if err != nil {
 		log.Printf("Error serving listener: %s \n", err)
@@ -137,5 +149,45 @@ func (ls locateServer) Locate(ctx context.Context, req *locator.LocateRequest) (
 	return &locator.LocateMessage{
 		Locates:   locates,
 		Timestamp: time.Now().Unix(),
+	}, nil
+}
+
+type tripDetailsServer struct {
+	locator.UnimplementedTripDetailsServer
+}
+
+func fetchStops() {
+
+}
+
+func (ts tripDetailsServer) TripDetails(ctx context.Context, req *locator.TripDetailsRequest) (*locator.TripDetailsMessage, error) {
+	row := pg.Db.QueryRow(context.Background(), "SELECT route_number, bus_type, first_stop, prev_stop, last_stop, delay, start_time, end_time FROM public.trips WHERE trip_id = $1", req.TripId)
+
+	var routeNumber string
+	var busType int32
+	var firstStop int32
+	var prevStop int32
+	var lastStop int32
+	var delay int32
+	var startTime string
+	var endTime string
+
+	err := row.Scan(&routeNumber, &busType, &firstStop, &prevStop, &lastStop, &delay, &startTime, &endTime)
+	if err != nil {
+		return nil, err
+	}
+
+	return &locator.TripDetailsMessage{
+		RouteNumber: routeNumber,
+		StartTime:   startTime,
+		EndTime:     endTime,
+		BusType:     0,
+		Stops: &locator.Stops{
+			FirstStop: "1",
+			PrevStop:  "2",
+			LastStop:  "3",
+		},
+		DelayInSeconds: delay,
+		Timestamp:      time.Now().Unix(),
 	}, nil
 }

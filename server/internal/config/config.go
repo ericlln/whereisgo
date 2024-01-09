@@ -22,13 +22,17 @@ func loadEnv() {
 }
 
 type Config struct {
-	RedisUrl string
+	DatabaseUrl   string
+	RedisUrl      string
+	TransitApiKey string
 }
 
 func GetConfig() *Config {
 	loadEnv()
 
 	return &Config{
-		RedisUrl: os.Getenv("REDIS_URL"),
+		DatabaseUrl:   os.Getenv("DATABASE_URL"),
+		RedisUrl:      os.Getenv("REDIS_URL"),
+		TransitApiKey: os.Getenv("TRANSIT_API_KEY"),
 	}
 }

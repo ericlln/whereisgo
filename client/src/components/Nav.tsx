@@ -6,7 +6,7 @@ const Nav = () => {
 			<div className="flex h-{36} justify-between px-4 py-[10px]">
 				{/* 36 + 10 * 2 = 56 navbar height*/}
 				<div>
-					<Link to="https://google.com">
+					<Link to="https://github.com/ericlln/whereisgo" target="_blank" rel="noopener noreferrer">
 						<button className="flex justify-left gap-1 group">
 							<svg
 								aria-hidden="true"
@@ -24,12 +24,14 @@ const Nav = () => {
 					</Link>
 				</div>
 				<div>
-					<button
-						onClick={() => {}}
-						className="text-2xl text-[#2E382E] font-semibold pr-4 hover:underline"
-					>
-						about
-					</button>
+					<Link to="https://www.erii.cc/projects/7" target="_blank" rel="noopener noreferrer">
+						<button
+							onClick={() => {}}
+							className="text-2xl text-[#2E382E] font-semibold pr-4 hover:underline"
+						>
+							about
+						</button>
+					</Link>
 				</div>
 			</div>
 		</nav>

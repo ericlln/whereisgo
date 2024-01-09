@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L, { LatLngBounds } from 'leaflet';
 import { GrpcWebFetchTransport } from '@protobuf-ts/grpcweb-transport';
-import { LocatorClient } from './proto/locator.client';
-import { LocateMessage, LocateRequest } from './proto/locator';
-import bus from './icons/bus.svg';
+import { LocatorClient } from '../proto/locator.client';
+import { LocateMessage, LocateRequest } from '../proto/locator';
+import bus from '../icons/bus.svg';
 import 'leaflet-rotatedmarker';
 import 'leaflet/dist/leaflet.css';
-import BusCard from './components/BusCard';
+import BusCard from './BusCard';
 
-const envoyURL = 'http://localhost:8080';
+const EnvoyUrl = 'http://localhost:8080';
 
 // Bus svg faces right (90 bearing)
 const icon = new L.Icon({
@@ -28,7 +28,7 @@ export default function Map() {
 
 	const getLocations = async () => {
 		let transport = new GrpcWebFetchTransport({
-			baseUrl: envoyURL,
+			baseUrl: EnvoyUrl,
 		});
 
 		let client = new LocatorClient(transport);

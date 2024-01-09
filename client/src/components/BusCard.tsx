@@ -63,12 +63,13 @@ export default function BusCard(props: Props) {
 			setTripDetails(resp);
 		} catch (error) {
 			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	}
 
 	useEffect(() => {
 		fetchData(props.tripId);
-		setLoading(false);
 	}, [props.tripId]);
 
 	return (

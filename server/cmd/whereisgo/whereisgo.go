@@ -13,6 +13,7 @@ import (
 	"math"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -79,7 +80,7 @@ type locateServer struct {
 	locator.UnimplementedLocatorServer
 }
 
-// Locate
+// Locate returns location information on vehicles in the user's current viewport
 func (ls locateServer) Locate(ctx context.Context, req *locator.LocateRequest) (*locator.LocateMessage, error) {
 	l := req.GetL()
 	b := req.GetB()
@@ -118,7 +119,7 @@ func (ls locateServer) Locate(ctx context.Context, req *locator.LocateRequest) (
 		return nil
 	})
 	if err != nil {
-		log.Printf("")
+		log.Println("Error executing redis pipeline")
 	}
 
 	for _, cmd := range cmds {
@@ -156,38 +157,49 @@ type tripDetailsServer struct {
 	locator.UnimplementedTripDetailsServer
 }
 
-func fetchStops() {
+func findStop(ctx context.Context, stop int) string {
+	stopId := fmt.Sprintf("%05d", stop) // Pad integer with 0s in accordance to locationCode
 
+	row := pg.Db.QueryRow(ctx, "SELECT station_name, city FROM public.stations WHERE location_code = $1", stopId)
+
+	var stationName string
+	var city string
+
+	err := row.Scan(&stationName, &city)
+	if err != nil {
+		log.Println("Error scanning station name:", err)
+	}
+
+	if stationName == "" {
+		return "Unknown Stop | Unknown"
+	}
+
+	return stationName + " | " + city
 }
 
+// TripDetails returns details about a trip given the tripId
 func (ts tripDetailsServer) TripDetails(ctx context.Context, req *locator.TripDetailsRequest) (*locator.TripDetailsMessage, error) {
-	row := pg.Db.QueryRow(context.Background(), "SELECT route_number, bus_type, first_stop, prev_stop, last_stop, delay, start_time, end_time FROM public.trips WHERE trip_id = $1", req.TripId)
+	row := pg.Db.QueryRow(ctx, "SELECT route_number, bus_type, first_stop, prev_stop, last_stop, delay, start_time, end_time FROM public.trips WHERE trip_id = $1", req.TripId)
 
-	var routeNumber string
-	var busType int32
-	var firstStop int32
-	var prevStop int32
-	var lastStop int32
-	var delay int32
-	var startTime string
-	var endTime string
+	details := &locator.TripDetailsMessage{}
 
-	err := row.Scan(&routeNumber, &busType, &firstStop, &prevStop, &lastStop, &delay, &startTime, &endTime)
+	var firstStop int
+	var prevStop int
+	var lastStop int
+
+	err := row.Scan(&details.RouteNumber, &details.BusType, &firstStop, &prevStop, &lastStop, &details.DelayInSeconds, &details.StartTime, &details.EndTime)
 	if err != nil {
 		return nil, err
 	}
 
-	return &locator.TripDetailsMessage{
-		RouteNumber: routeNumber,
-		StartTime:   startTime,
-		EndTime:     endTime,
-		BusType:     0,
-		Stops: &locator.Stops{
-			FirstStop: "1",
-			PrevStop:  "2",
-			LastStop:  "3",
-		},
-		DelayInSeconds: delay,
-		Timestamp:      time.Now().Unix(),
-	}, nil
+	details.RouteNumber = strings.TrimSpace(details.RouteNumber)
+
+	stops := &locator.Stops{
+		FirstStop: findStop(ctx, firstStop),
+		PrevStop:  findStop(ctx, prevStop),
+		LastStop:  findStop(ctx, lastStop),
+	}
+	details.Stops = stops
+
+	return details, nil
 }

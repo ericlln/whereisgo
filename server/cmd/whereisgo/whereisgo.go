@@ -17,11 +17,11 @@ import (
 	"time"
 )
 
+var cfg = config.GetConfig("server")
 var red = initRedis()
 var pg = initPg()
 
 func initPg() *db.Postgres {
-	cfg := config.GetConfig()
 	newPg, err := db.NewPG(context.Background(), cfg.DatabaseUrl)
 	if err != nil {
 		return nil
@@ -30,7 +30,6 @@ func initPg() *db.Postgres {
 }
 
 func initRedis() *db.Redis {
-	cfg := config.GetConfig()
 	r, err := db.NewRedis(cfg.RedisUrl)
 	if err != nil {
 		log.Fatal("Error creating Redis connection")

@@ -7,9 +7,7 @@ import (
 	"regexp"
 )
 
-const projectDirName = "server"
-
-func loadEnv() {
+func loadEnv(projectDirName string) {
 	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
 	currentWorkDirectory, _ := os.Getwd()
 	rootPath := projectName.Find([]byte(currentWorkDirectory))
@@ -27,8 +25,8 @@ type Config struct {
 	TransitApiKey string
 }
 
-func GetConfig() *Config {
-	loadEnv()
+func GetConfig(projectDirName string) *Config {
+	loadEnv(projectDirName)
 
 	return &Config{
 		DatabaseUrl:   os.Getenv("DATABASE_URL"),

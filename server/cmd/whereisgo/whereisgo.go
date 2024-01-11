@@ -118,7 +118,8 @@ func (ls locateServer) Locate(ctx context.Context, req *locator.LocateRequest) (
 		return nil
 	})
 	if err != nil {
-		log.Println("Error executing redis pipeline")
+		log.Println("Error executing redis pipeline:", err)
+		return nil, nil
 	}
 
 	for _, cmd := range cmds {

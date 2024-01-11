@@ -44,14 +44,14 @@ func main() {
 
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Printf("Error creating listener: %s \n", err)
+		log.Println("Error creating listener: ", err)
 	}
 
 	locator.RegisterLocatorServer(server, service)
 	locator.RegisterTripDetailsServer(server, service2)
 	err = server.Serve(listener)
 	if err != nil {
-		log.Printf("Error serving listener: %s \n", err)
+		log.Println("Error serving listener: ", err)
 	}
 }
 

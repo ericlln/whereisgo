@@ -34,7 +34,7 @@ export default function Status(props: Props) {
 					</svg>
 				</span>
 			)}
-			<span className="text-lg text-gray-300">
+			<span className="text-xs sm:text-lg text-gray-300">
 				{props.value ? props.title + props.value : props.title}
 			</span>
 		</div>

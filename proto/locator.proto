@@ -50,3 +50,18 @@ message TripDetailsRequest {
 service TripDetails {
   rpc TripDetails(TripDetailsRequest) returns (TripDetailsMessage);
 }
+
+
+// Health Check
+message HealthCheckMessage {
+  int32 stopCount = 1;
+  int32 trips = 2;
+  float averageDelay = 3;
+}
+
+service HealthCheck {
+  rpc HealthCheck(Empty) returns (HealthCheckMessage);
+}
+
+// Empty
+message Empty{}

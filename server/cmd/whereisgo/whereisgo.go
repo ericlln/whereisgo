@@ -41,6 +41,7 @@ func main() {
 	server := grpc.NewServer()
 	service := &locateServer{}
 	service2 := &tripDetailsServer{}
+	service3 := &healthCheckServer{}
 
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -49,6 +50,7 @@ func main() {
 
 	locator.RegisterLocatorServer(server, service)
 	locator.RegisterTripDetailsServer(server, service2)
+	locator.RegisterHealthCheckServer(server, service3)
 	err = server.Serve(listener)
 	if err != nil {
 		log.Println("Error serving listener: ", err)
@@ -202,4 +204,61 @@ func (ts tripDetailsServer) TripDetails(ctx context.Context, req *locator.TripDe
 	details.Stops = stops
 
 	return details, nil
+}
+
+type healthCheckServer struct {
+	locator.UnimplementedHealthCheckServer
+}
+
+func (hs healthCheckServer) HealthCheck(ctx context.Context, req *locator.Empty) (*locator.HealthCheckMessage, error) {
+	var stopCount int
+	row := pg.Db.QueryRow(ctx, "SELECT COUNT(*) FROM public.stations")
+	err := row.Scan(&stopCount)
+	if err != nil {
+		log.Println("Error getting row count from stations table:", err)
+		return nil, err
+	}
+
+	cmd := red.Client.ZCount(ctx, "locates", "-inf", "+inf")
+	tripCount, err := cmd.Result()
+	if err != nil {
+		log.Println("Error getting number of records in locates set:", err)
+		return nil, err
+	}
+
+	var totalDelay int
+	var totalCount int
+	rows, err := pg.Db.Query(ctx, "SELECT delay, timestamp FROM public.trips ORDER BY timestamp DESC")
+	if err != nil {
+		log.Println("Error querying from trips table:", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var delay int
+		var timestamp int64
+		err := rows.Scan(&delay, &timestamp)
+		if err != nil {
+			log.Println("Error getting delay and timestamp from trips table:", err)
+		}
+
+		if time.Now().Unix()-timestamp > 60*60 { // Unix time is in seconds => records in last hour are looked at
+			break // Results are sorted by largest->smallest => can stop as soon as a small enough timestamp is found
+		}
+
+		totalDelay += delay
+		totalCount++
+	}
+
+	var averageDelay float32 = 0
+	if totalCount > 0 {
+		averageDelay = float32(totalDelay) / float32(totalCount)
+	}
+
+	return &locator.HealthCheckMessage{
+		StopCount:    int32(stopCount),
+		Trips:        int32(tripCount),
+		AverageDelay: averageDelay, // in seconds
+	}, nil
 }

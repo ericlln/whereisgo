@@ -97,7 +97,7 @@ export default function Map() {
 		<>
 			<div className="flex flex-col bg-[#9EBC9F] h-[calc(100% - 116px)]">
 				<MapContainer
-					center={[43.7186797, -80.5690764]}
+					center={[43.6690299, -79.6000671]}
 					zoom={10}
 					style={{ height: 'calc(100vh - 116px)', width: '100%' }}
 				>

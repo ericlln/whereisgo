@@ -1,15 +1,14 @@
 #!/bin/bash
 
 # Generate TS code
-
 for filename in ./proto/*.proto; do
     [ -e "$filename" ] || continue
     cp "$filename" ./client
 done
 
 cd ./client
+mkdir -p ./src/proto
 npx protoc --ts_out ./src/proto --ts_opt long_type_string --proto_path . ./locator.proto
-
 
 # Generate GO code
 cd ..

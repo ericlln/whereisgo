@@ -52,6 +52,7 @@ func main() {
 	locator.RegisterTripDetailsServer(server, service2)
 	locator.RegisterHealthCheckServer(server, service3)
 	err = server.Serve(listener)
+	log.Println("Serving server on port 50051")
 	if err != nil {
 		log.Println("Error serving listener: ", err)
 	}
